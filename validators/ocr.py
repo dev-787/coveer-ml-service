@@ -5,10 +5,14 @@ from PIL import Image
 
 import easyocr
 
-# Initialise the EasyOCR reader once at module level.
-# This is intentionally slow on first import but fast on subsequent calls.
-# gpu=False ensures compatibility on CPU-only environments.
-reader = easyocr.Reader(["en", "hi"], gpu=False)
+# Lazy-loaded reader — avoids loading at import/build time
+_reader = None
+
+def get_reader():
+    global _reader
+    if _reader is None:
+        _reader = easyocr.Reader(["en", "hi"], gpu=False)
+    return _reader
 
 # Timeout (seconds) for downloading images from URLs
 DOWNLOAD_TIMEOUT = 15
@@ -23,7 +27,7 @@ def extract_text(image: Image.Image) -> str:
     """
     try:
         img_array = np.array(image.convert("RGB"))
-        results = reader.readtext(img_array)
+        results = get_reader().readtext(img_array)
         # Each result is (bbox, text, confidence) — we only need the text
         return " ".join(text for (_, text, _) in results)
     except Exception:
