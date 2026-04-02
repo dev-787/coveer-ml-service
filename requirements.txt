@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+easyocr
+Pillow
+numpy
+requests
+python-dateutil
+rapidfuzz
